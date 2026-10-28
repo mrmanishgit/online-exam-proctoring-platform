@@ -1,0 +1,25 @@
+# IDE
+.metadata/
+.idea/
+.vscode/
+*.iml
+
+# Java / Maven
+**/target/
+
+# Node / React
+**/node_modules/
+**/dist/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/application-local.properties
+
+# Logs
+*.log
+
+# Operating system
+.DS_Store
+Thumbs.db
