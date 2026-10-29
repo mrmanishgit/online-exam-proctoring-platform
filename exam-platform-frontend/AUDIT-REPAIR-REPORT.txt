@@ -1,0 +1,29 @@
+Exam Platform Frontend — Audit & Repair Report
+
+Input: user-provided m.zip
+
+Repairs performed:
+1. Filled all 13 zero-byte API modules with default-exported Axios API objects:
+   adminApi, answerApi, attemptApi, codingApi, examApi, invitationApi,
+   notificationApi, proctoringApi, questionApi, reportApi, resultApi,
+   uploadApi, and userApi.
+2. Implemented the previously empty pages/public/HomePage.jsx.
+3. Added CSS theme tokens to the previously empty assets/styles/theme.css.
+4. Added logo.svg and login/exam illustration SVGs only where missing/empty.
+5. Fixed a confirmed named-export mismatch: StudentProfilePage.jsx and
+   EmployeeProfilePage.jsx import { useAuth }, so hooks/useAuth.js now exports
+   both the default useAuth and named useAuth.
+6. Preserved the other files and the original project/package configuration.
+
+Static checks performed:
+- No zero-byte files remain under src/.
+- No unresolved relative imports were found.
+- No unresolved named imports were found after the useAuth fix.
+- No default imports from local modules lacking a default export were found.
+
+Important limitations:
+- API endpoint paths are conventional REST assumptions. They must match your
+  actual backend controller routes; this ZIP cannot prove the backend endpoints exist.
+- npm ci did not finish within the available validation window, so `npm run build`
+  could not be confirmed here. Run `npm ci` and `npm run build` on your PC.
+- Static import checks are not a substitute for a full compile and browser test.

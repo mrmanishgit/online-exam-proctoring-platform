@@ -1,0 +1,217 @@
+Folder PATH listing for volume Windows
+Volume serial number is 66C5-B39B
+C:\USERS\AJITM\ONEDRIVE\DESKTOP\EXAM PROJECTS\EXAM-PLATFORM-FRONTEND\SRC
+|   App.css
+|   App.jsx
+|   index.css
+|   main.jsx
+|   
++---api
+|       adminApi.js
+|       answerApi.js
+|       attemptApi.js
+|       authApi.js
+|       axiosClient.js
+|       codingApi.js
+|       examApi.js
+|       invitationApi.js
+|       notificationApi.js
+|       proctoringApi.js
+|       questionApi.js
+|       reportApi.js
+|       resultApi.js
+|       uploadApi.js
+|       userApi.js
+|       
++---app
+|       AppProviders.jsx
+|       AppRouter.jsx
+|       navigationConfig.js
+|       routeConfig.js
+|       
++---assets
+|   |   hero.png
+|   |   react.svg
+|   |   vite.svg
+|   |   
+|   +---icons
+|   +---images
+|   \---styles
+|           global.css
+|           responsive.css
+|           theme.css
+|           variables.css
+|           
++---components
+|   +---admin
+|   |       AdminStatsCard.jsx
+|   |       CandidateDataTable.jsx
+|   |       CandidateSearch.jsx
+|   |       CreateExamForm.jsx
+|   |       ExamAssignmentForm.jsx
+|   |       ExamDataTable.jsx
+|   |       ExamStatusFilter.jsx
+|   |       ExamSummaryCard.jsx
+|   |       InvitationForm.jsx
+|   |       LiveMonitoringPanel.jsx
+|   |       NotificationForm.jsx
+|   |       ProctorEventTable.jsx
+|   |       QuestionBuilder.jsx
+|   |       QuestionEditor.jsx
+|   |       ReportFilters.jsx
+|   |       ResultsSummary.jsx
+|   |       ResultTable.jsx
+|   |       ScheduleExamForm.jsx
+|   |       
+|   +---auth
+|   |       ForgotPasswordForm.jsx
+|   |       LoginForm.jsx
+|   |       PasswordField.jsx
+|   |       PasswordStrength.jsx
+|   |       RegisterForm.jsx
+|   |       ResendVerification.jsx
+|   |       ResetPasswordForm.jsx
+|   |       VerifyEmailNotice.jsx
+|   |       
+|   +---coding
+|   |       CodeEditor.jsx
+|   |       CodeSubmissionStatus.jsx
+|   |       CodeToolbar.jsx
+|   |       ExecutionResult.jsx
+|   |       LanguageSelector.jsx
+|   |       ProblemDescription.jsx
+|   |       SubmissionHistory.jsx
+|   |       TestCasePanel.jsx
+|   |       
+|   +---common
+|   |       ConfirmDialog.jsx
+|   |       EmptyState.jsx
+|   |       ErrorBoundary.jsx
+|   |       ErrorMessage.jsx
+|   |       Loader.jsx
+|   |       PageHeader.jsx
+|   |       Pagination.jsx
+|   |       ProtectedRoute.jsx
+|   |       RoleGuard.jsx
+|   |       SearchBar.jsx
+|   |       StatusChip.jsx
+|   |       
+|   +---exam
+|   |       AnswerOptions.jsx
+|   |       ExamCard.jsx
+|   |       ExamProgress.jsx
+|   |       ExamTimer.jsx
+|   |       QuestionCard.jsx
+|   |       QuestionNavigator.jsx
+|   |       QuestionPalette.jsx
+|   |       ReviewMarker.jsx
+|   |       SaveStatus.jsx
+|   |       SubmitExamDialog.jsx
+|   |       
+|   +---layout
+|   |       AdminLayout.jsx
+|   |       AuthLayout.jsx
+|   |       Breadcrumbs.jsx
+|   |       EmployeeLayout.jsx
+|   |       Footer.jsx
+|   |       Navbar.jsx
+|   |       PublicLayout.jsx
+|   |       Sidebar.jsx
+|   |       StudentLayout.jsx
+|   |       
+|   +---notifications
+|   +---proctoring
+|   |       CameraPreview.jsx
+|   |       ConnectionStatus.jsx
+|   |       FullscreenWarning.jsx
+|   |       MicrophoneCheck.jsx
+|   |       PermissionCheck.jsx
+|   |       ProctoringNotice.jsx
+|   |       ProctoringStatus.jsx
+|   |       ScreenSharePreview.jsx
+|   |       
+|   \---results
++---contexts
+|       AuthContext.jsx
+|       ExamContext.jsx
+|       NotificationContext.jsx
+|       ThemeContext.jsx
+|       
++---hooks
+|       useAuth.js
+|       useExam.js
+|       
++---layouts
++---pages
+|   +---admin
+|   |       AdminDashboardPage.jsx
+|   |       AuditLogsPage.jsx
+|   |       CandidateDetailsPage.jsx
+|   |       CreateExamPage.jsx
+|   |       EditExamPage.jsx
+|   |       ExamAssignmentsPage.jsx
+|   |       ExamManagementPage.jsx
+|   |       ExamSchedulingPage.jsx
+|   |       InvitationsPage.jsx
+|   |       LiveMonitoringPage.jsx
+|   |       NotificationsPage.jsx
+|   |       ProctorReviewPage.jsx
+|   |       QuestionImportPage.jsx
+|   |       QuestionManagementPage.jsx
+|   |       ReportsPage.jsx
+|   |       ResultsManagementPage.jsx
+|   |       SystemSettingsPage.jsx
+|   |       UserManagementPage.jsx
+|   |       
+|   +---auth
+|   |       ForgotPasswordPage.jsx
+|   |       LoginPage.jsx
+|   |       RegisterPage.jsx
+|   |       ResetPasswordPage.jsx
+|   |       UnauthorizedPage.jsx
+|   |       VerifyEmailPage.jsx
+|   |       
+|   +---employee
+|   |       AssignedExamsPage.jsx
+|   |       EmployeeAttemptsPage.jsx
+|   |       EmployeeDashboardPage.jsx
+|   |       EmployeeProfilePage.jsx
+|   |       
+|   +---errors
+|   |       NotFoundPage.jsx
+|   |       ServerErrorPage.jsx
+|   |       
+|   +---public
+|   |       AboutPage.jsx
+|   |       ContactPage.jsx
+|   |       HomePage.jsx
+|   |       PrivacyPolicyPage.jsx
+|   |       TermsPage.jsx
+|   |       
+|   \---student
+|           AptitudeExamPage.jsx
+|           AvailableExamsPage.jsx
+|           CodingExamPage.jsx
+|           ExamDetailsPage.jsx
+|           ExamInstructionsPage.jsx
+|           ExamSubmissionPage.jsx
+|           MyAttemptsPage.jsx
+|           MyResultsPage.jsx
+|           StudentDashboardPage.jsx
+|           StudentProfilePage.jsx
+|           SystemCheckPage.jsx
+|           
++---routes
++---schemas
++---services
+|       authService.js
+|       
++---test
+|   |   setupTests.js
+|   |   
+|   +---components
+|   +---pages
+|   \---services
+\---utils
+        constants.js
+        

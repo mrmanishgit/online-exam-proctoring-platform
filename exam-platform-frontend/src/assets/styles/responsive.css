@@ -1,0 +1,30 @@
+@media (max-width: 900px) {
+    .section-spacing {
+        padding-block: 60px;
+    }
+}
+
+@media (max-width: 600px) {
+    .page-container {
+        width: calc(100% - 32px);
+    }
+
+    .section-spacing {
+        padding-block: 44px;
+    }
+
+    .section-heading {
+        margin-bottom: 28px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

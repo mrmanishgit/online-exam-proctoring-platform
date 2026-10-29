@@ -1,0 +1,52 @@
+.page-container {
+    width: min(var(--container-width), calc(100% - 48px));
+    margin-inline: auto;
+}
+
+.section-spacing {
+    padding-block: 80px;
+}
+
+.section-heading {
+    max-width: 680px;
+    margin: 0 auto 40px;
+    text-align: center;
+}
+
+.section-heading h2 {
+    margin: 0 0 14px;
+    color: var(--color-text);
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.2;
+    letter-spacing: -1.5px;
+}
+
+.section-heading p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.surface-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.text-muted {
+    color: var(--color-muted);
+}
+
+.gradient-text {
+    background: linear-gradient(110deg, #4F46E5, #0EA5E9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.focus-ring:focus-visible {
+    outline: 3px solid #A5B4FC;
+    outline-offset: 3px;
+}
