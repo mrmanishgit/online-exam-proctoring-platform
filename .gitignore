@@ -1,10 +1,65 @@
 
+# ==============================
+# Eclipse / STS Workspace
+# ==============================
 .metadata/
 **/.metadata/
-**/target/
-**/node_modules/
-**/dist/
 **/.classpath
 **/.project
 **/.settings/
+
+# ==============================
+# Java / Spring Boot / Maven
+# ==============================
+**/target/
+**/build/
+*.class
+*.log
+
+# ==============================
+# React / Node / Vite
+# ==============================
+**/node_modules/
+**/dist/
+**/.vite/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ==============================
+# Environment / Secrets
+# ==============================
 .env
+.env.*
+!.env.example
+
+# ==============================
+# IDE
+# ==============================
+.idea/
+.vscode/
+*.iml
+
+# ==============================
+# Runtime / Uploaded Files
+# ==============================
+**/uploads/
+**/storage/
+**/logs/
+**/temp/
+
+# ==============================
+# Backup Files
+# ==============================
+*.zip
+*.rar
+*.bak
+*.tmp
+*.old
+
+# ==============================
+# Operating System
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
