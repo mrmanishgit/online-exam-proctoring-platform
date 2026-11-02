@@ -8,7 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import PasswordField from "./PasswordField";
 import useAuth from "../../hooks/useAuth";
 import { getDashboardPath, ROUTES } from "../../app/routeConfig";
@@ -16,7 +16,7 @@ import { getDashboardPath, ROUTES } from "../../app/routeConfig";
 export default function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  //const location = useLocation();
 
   const [form, setForm] = useState({
     email: "",
@@ -47,10 +47,12 @@ export default function LoginForm() {
         rememberMe: form.rememberMe,
       });
 
-      const destination =
-        location.state?.from?.pathname || getDashboardPath(user.role);
+      const destination = getDashboardPath(
+      String(user.role || "").toUpperCase()
+    );
 
-      navigate(destination, { replace: true });
+    navigate(destination, { replace: true });
+
     } catch (err) {
       setError(
         err.response?.data?.message ||

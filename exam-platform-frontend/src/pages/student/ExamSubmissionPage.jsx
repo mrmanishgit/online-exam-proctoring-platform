@@ -60,21 +60,15 @@ export default function ExamSubmissionPage() {
           </Typography>
 
           <Typography color="text.secondary" sx={{ maxWidth: 520, mx: "auto" }}>
-            Your submission has been processed by this demo interface. The
-            actual submission status must be confirmed by the backend.
+            {result.backendConfirmed ? "Your attempt was submitted and confirmed by the ExamPilot backend." : "Your submission status has not been confirmed by the backend."}
           </Typography>
 
-          <Chip
-            label="Demo submission"
-            color="warning"
-            variant="outlined"
-            sx={{ mt: 2 }}
-          />
+          <Chip label={result.backendConfirmed ? "Backend confirmed" : "Not confirmed"} color={result.backendConfirmed ? "success" : "warning"} variant="outlined" sx={{ mt: 2 }} />
 
           <Alert severity="info" sx={{ mt: 3, textAlign: "left" }}>
             {isCoding
               ? "Your code has not been sent to a server or evaluated. Connect the coding submission API to persist and assess it."
-              : "Your answers have not been saved to a server. Connect the exam submission API to store the attempt and calculate the official result."}
+              : (result.backendConfirmed ? `Attempt #${result.attemptId} has been saved. Results will appear after publication.` : "Your answers have not been confirmed by the server.")}
           </Alert>
 
           <Grid container spacing={2} sx={{ mt: 2, mb: 3 }}>

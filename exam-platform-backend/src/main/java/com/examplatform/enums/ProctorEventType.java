@@ -1,5 +1,5 @@
 package com.examplatform.enums;
 
-public class ProctorEventType {
-
+public enum ProctorEventType {
+    FACE_NOT_DETECTED, MULTIPLE_FACES, TAB_SWITCH, WINDOW_BLUR, CAMERA_DISABLED, MICROPHONE_DISABLED, SCREEN_SHARE_STOPPED, SUSPICIOUS_ACTIVITY, OTHER
 }

@@ -13,6 +13,7 @@ import EmployeeLayout from "../components/layout/EmployeeLayout";
 import AdminLayout from "../components/layout/AdminLayout";
 
 import HomePage from "../pages/public/HomePage";
+import InvitationAcceptPage from "../pages/public/InvitationAcceptPage";
 import AboutPage from "../pages/public/AboutPage";
 import ContactPage from "../pages/public/ContactPage";
 import PrivacyPolicyPage from "../pages/public/PrivacyPolicyPage";
@@ -34,6 +35,7 @@ import ExamDetailsPage from "../pages/student/ExamDetailsPage";
 import ExamInstructionsPage from "../pages/student/ExamInstructionsPage";
 import SystemCheckPage from "../pages/student/SystemCheckPage";
 import AptitudeExamPage from "../pages/student/AptitudeExamPage";
+import ExamTakingUnavailablePage from "../pages/student/ExamTakingUnavailablePage";
 import CodingExamPage from "../pages/student/CodingExamPage";
 import ExamSubmissionPage from "../pages/student/ExamSubmissionPage";
 import MyAttemptsPage from "../pages/student/MyAttemptsPage";
@@ -106,6 +108,7 @@ export default function AppRouter() {
       {/* Public pages */}
       <Route element={<PublicLayout />}>
         <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route path="/invitation/accept" element={<InvitationAcceptPage />} />
         <Route path={ROUTES.ABOUT} element={<AboutPage />} />
         <Route path={ROUTES.CONTACT} element={<ContactPage />} />
         <Route path={ROUTES.PRIVACY} element={<PrivacyPolicyPage />} />
@@ -134,6 +137,7 @@ export default function AppRouter() {
               path="/student/exams/:examId/instructions"
               element={<ExamInstructionsPage />}
             />
+            <Route path="/student/exams/:examId/take" element={<AptitudeExamPage />} />
             <Route path="/student/exams/:examId/system-check" element={<SystemCheckPage />} />
             <Route path="/student/exams/:examId/aptitude" element={<AptitudeExamPage />} />
             <Route path="/student/exams/:examId/coding" element={<CodingExamPage />} />
@@ -149,6 +153,7 @@ export default function AppRouter() {
           <Route element={<EmployeeLayout />}>
             <Route path={ROUTES.EMPLOYEE} element={<EmployeeDashboardPage />} />
             <Route path={ROUTES.EMPLOYEE_EXAMS} element={<AssignedExamsPage />} />
+            <Route path="/employee/assignments" element={<ExamAssignmentsPage />} />
             <Route path={ROUTES.EMPLOYEE_ATTEMPTS} element={<EmployeeAttemptsPage />} />
             <Route path={ROUTES.EMPLOYEE_PROFILE} element={<EmployeeProfilePage />} />
           </Route>

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8082/api",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -27,6 +27,7 @@ axiosClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      localStorage.removeItem("exampilot_user");
     }
 
     return Promise.reject(error);

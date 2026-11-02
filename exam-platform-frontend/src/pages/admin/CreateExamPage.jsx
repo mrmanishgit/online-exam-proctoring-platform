@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { SaveOutlined, ArrowBack } from "@mui/icons-material";
 import PageHeader from "../../components/common/PageHeader";
+import examApi from "../../api/examApi";
 
 const initialForm = {
   title: "",
@@ -32,6 +33,8 @@ export default function CreateExamPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -42,9 +45,10 @@ export default function CreateExamPage() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setNotice("");
 
     if (Number(form.duration) <= 0) {
       setError("Duration must be greater than zero.");
@@ -61,10 +65,22 @@ export default function CreateExamPage() {
       return;
     }
 
-    // Connect to the exam creation API before using this in production.
-    window.alert(
-      "The form is valid, but the exam creation API is not connected yet.",
-    );
+    setLoading(true);
+    try {
+      const response = await examApi.createExam({
+        title: form.title.trim(), description: form.description,
+        subject: form.category, examType: form.category.toUpperCase(),
+        durationMinutes: Number(form.duration), totalMarks: Number(form.totalMarks),
+        passingMarks: Number(form.passingMarks), status: "DRAFT",
+        shuffleQuestions: false, negativeMarking: false
+      });
+      const created = response.data?.data || response.data;
+      setNotice(`Exam #${created.id} created. Add its questions, schedule it, assign candidates, then publish.`);
+      setForm(initialForm);
+      setTimeout(() => navigate("/admin/questions?examId=" + created.id), 800);
+    } catch (e) {
+      setError(e.response?.data?.message || "Unable to create exam. Check required fields and backend logs.");
+    } finally { setLoading(false); }
   };
 
   return (
@@ -83,11 +99,8 @@ export default function CreateExamPage() {
         }
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+      {notice && <Alert severity="success" sx={{ mb: 3 }}>{notice}</Alert>}
 
       <Card sx={{ borderRadius: 3, maxWidth: 900 }}>
         <CardContent sx={{ p: { xs: 2, md: 4 } }}>
@@ -202,12 +215,8 @@ export default function CreateExamPage() {
               </Alert>
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<SaveOutlined />}
-                >
-                  Save Examination
+                <Button type="submit" variant="contained" startIcon={<SaveOutlined />} disabled={loading}>
+                  {loading ? "Saving..." : "Save Examination"}
                 </Button>
 
                 <Button

@@ -1,11 +1,12 @@
 import axiosClient from "./axiosClient";
 
 const attemptApi = {
-  startAttempt: (examId, payload = {}) => axiosClient.post(`/exams/${encodeURIComponent(examId)}/attempts`, payload),
-  getAttemptById: (id) => axiosClient.get(`/attempts/${encodeURIComponent(id)}`),
+  startAttempt: (examId) => axiosClient.post(`/attempts/start/${encodeURIComponent(examId)}`),
+  getQuestions: (attemptId) => axiosClient.get(`/attempts/${encodeURIComponent(attemptId)}/questions`),
+  getAttemptById: (id) => axiosClient.get(`/exam-attempts/${encodeURIComponent(id)}`),
   getMyAttempts: (params) => axiosClient.get("/attempts/me", { params }),
-  getAttempts: (params) => axiosClient.get("/attempts", { params }),
-  submitAttempt: (id, payload = {}) => axiosClient.post(`/attempts/${encodeURIComponent(id)}/submit`, payload),
-  saveAttempt: (id, payload) => axiosClient.patch(`/attempts/${encodeURIComponent(id)}`, payload),
+  getAttempts: (params) => axiosClient.get("/exam-attempts", { params }),
+  saveAnswer: (attemptId, payload) => axiosClient.put(`/attempts/${encodeURIComponent(attemptId)}/answers`, payload),
+  submitAttempt: (attemptId) => axiosClient.post(`/attempts/${encodeURIComponent(attemptId)}/submit`),
 };
 export default attemptApi;

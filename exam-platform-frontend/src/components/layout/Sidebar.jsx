@@ -22,7 +22,8 @@ import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import { Link, useLocation } from "react-router-dom";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getNavigationForRole } from "../../app/navigationConfig";
 import useAuth from "../../hooks/useAuth";
 
@@ -48,8 +49,13 @@ export default function Sidebar({
   mobileWidth = 280,
   desktopWidth = 260,
 }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try { await logout(); } finally { onClose(); navigate("/login", { replace: true }); }
+  };
   const navigation = getNavigationForRole(user?.role);
 
   const content = (
@@ -145,6 +151,18 @@ export default function Sidebar({
           );
         })}
       </List>
+
+      <Box sx={{ px: 1.5, pb: 1 }}>
+        <ListItemButton
+          onClick={handleLogout}
+          sx={{ borderRadius: 2.5, minHeight: 46, color: "error.main" }}
+        >
+          <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+            <LogoutRoundedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: 13.5, fontWeight: 700 }} />
+        </ListItemButton>
+      </Box>
 
       <Box p={2}>
         <Box

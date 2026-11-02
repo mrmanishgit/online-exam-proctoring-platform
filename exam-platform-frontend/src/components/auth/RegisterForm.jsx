@@ -2,10 +2,6 @@ import { useState } from "react";
 import {
   Alert,
   Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
   TextField,
   Typography,
@@ -15,7 +11,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import PasswordField from "./PasswordField";
 import PasswordStrength from "./PasswordStrength";
 import useAuth from "../../hooks/useAuth";
-import { ROUTES, ROLES } from "../../app/routeConfig";
+import { ROUTES } from "../../app/routeConfig";
 
 export default function RegisterForm() {
   const { register } = useAuth();
@@ -26,7 +22,6 @@ export default function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: ROLES.STUDENT,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,11 +55,15 @@ export default function RegisterForm() {
     setLoading(true);
 
     try {
+      const nameParts = form.fullName.trim().split(/\\s+/);
+      const firstName = nameParts.shift() || "";
+      const lastName = nameParts.join(" ") || "-";
+
       await register({
-        name: form.fullName.trim(),
+        firstName,
+        lastName,
         email: form.email.trim().toLowerCase(),
         password: form.password,
-        role: form.role,
       });
 
       navigate(ROUTES.LOGIN, {
@@ -109,19 +108,7 @@ export default function RegisterForm() {
         required
       />
 
-      <FormControl fullWidth>
-        <InputLabel id="register-role-label">Account type</InputLabel>
-        <Select
-          labelId="register-role-label"
-          name="role"
-          label="Account type"
-          value={form.role}
-          onChange={handleChange}
-        >
-          <MenuItem value={ROLES.STUDENT}>Student</MenuItem>
-          <MenuItem value={ROLES.EMPLOYEE}>Employee / Examiner</MenuItem>
-        </Select>
-      </FormControl>
+
 
       <PasswordField
         name="password"
@@ -142,8 +129,8 @@ export default function RegisterForm() {
       />
 
       <Alert severity="info">
-        Administrator accounts should be created through a secure administrative
-        process, not public registration.
+        Public registration creates a student account. Employee and administrator
+        accounts must be created by an authorized administrator.
       </Alert>
 
       <Button

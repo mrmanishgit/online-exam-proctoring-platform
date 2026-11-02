@@ -17,14 +17,35 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem(USER_KEY);
-      if (savedUser) setUser(JSON.parse(savedUser));
-    } catch {
-      localStorage.removeItem(USER_KEY);
-    } finally {
-      setIsLoading(false);
-    }
+    let active = true;
+    const hydrateSession = async () => {
+      const token = authService.getAccessToken();
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const response = await authService.getCurrentUser();
+        const current = response?.user ?? response?.data?.user ?? response?.data ?? response;
+        if (active && current && (current.id || current.email)) {
+          setUser(current);
+          localStorage.setItem(USER_KEY, JSON.stringify(current));
+        } else if (active) {
+          authService.clearTokens();
+          localStorage.removeItem(USER_KEY);
+        }
+      } catch {
+        if (active) {
+          authService.clearTokens();
+          localStorage.removeItem(USER_KEY);
+          setUser(null);
+        }
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+    hydrateSession();
+    return () => { active = false; };
   }, []);
 
   const login = useCallback(async (credentials) => {
@@ -35,15 +56,20 @@ export function AuthProvider({ children }) {
       throw new Error("Login response did not include a user.");
     }
 
-    setUser(loggedInUser);
+    const normalizedUser = {
+      ...loggedInUser,
+      role: String(loggedInUser.role || "").toUpperCase(),
+      name: loggedInUser.name || [loggedInUser.firstName, loggedInUser.lastName].filter(Boolean).join(" "),
+    };
+    setUser(normalizedUser);
 
     try {
-      localStorage.setItem(USER_KEY, JSON.stringify(loggedInUser));
+      localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
     } catch {
       // The current session remains usable if storage is unavailable.
     }
 
-    return loggedInUser;
+    return normalizedUser;
   }, []);
 
   const register = useCallback(async (details) => {

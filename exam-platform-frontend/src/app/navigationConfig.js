@@ -17,6 +17,7 @@ export const studentNavigation = [
 export const employeeNavigation = [
   { label: "Dashboard", path: ROUTES.EMPLOYEE, icon: "dashboard" },
   { label: "Assigned Exams", path: ROUTES.EMPLOYEE_EXAMS, icon: "assignment" },
+  { label: "Assign Students", path: "/employee/assignments", icon: "groups" },
   { label: "Candidate Attempts", path: ROUTES.EMPLOYEE_ATTEMPTS, icon: "groups" },
   { label: "My Profile", path: ROUTES.EMPLOYEE_PROFILE, icon: "person" },
 ];
@@ -27,6 +28,7 @@ export const adminNavigation = [
   { label: "Exam Management", path: ROUTES.ADMIN_EXAMS, icon: "assignment" },
   { label: "Question Management", path: ROUTES.ADMIN_QUESTIONS, icon: "quiz" },
   { label: "Exam Scheduling", path: ROUTES.ADMIN_SCHEDULES, icon: "event" },
+  { label: "Exam Assignments", path: "/admin/assignments", icon: "groups" },
   { label: "Invitations", path: ROUTES.ADMIN_INVITATIONS, icon: "mail" },
   { label: "Live Monitoring", path: ROUTES.ADMIN_MONITORING, icon: "videocam" },
   { label: "Results", path: ROUTES.ADMIN_RESULTS, icon: "analytics" },

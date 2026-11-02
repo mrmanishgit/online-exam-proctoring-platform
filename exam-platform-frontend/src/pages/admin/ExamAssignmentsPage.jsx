@@ -1,250 +1,92 @@
-import { useMemo, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-//import { PersonAddAlt1Outlined, DeleteOutline } from "@mui/icons-material";
-import { PersonAddAlt1Outlined, Delete } from "@mui/icons-material";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Box, Button, Card, CardContent, Chip, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { PersonAddAlt1Outlined } from "@mui/icons-material";
 import PageHeader from "../../components/common/PageHeader";
 import SearchBar from "../../components/common/SearchBar";
 import EmptyState from "../../components/common/EmptyState";
-
-const initialAssignments = [
-  {
-    id: "ASN-101",
-    exam: "Java Fundamentals Assessment",
-    candidate: "Aarav Sharma",
-    email: "aarav@example.com",
-    status: "Assigned",
-  },
-  {
-    id: "ASN-102",
-    exam: "Python Coding Challenge",
-    candidate: "Priya Das",
-    email: "priya@example.com",
-    status: "Invited",
-  },
-  {
-    id: "ASN-103",
-    exam: "Logical Reasoning Test",
-    candidate: "Rahul Kumar",
-    email: "rahul@example.com",
-    status: "Completed",
-  },
-];
-
-const examOptions = [
-  "Java Fundamentals Assessment",
-  "Python Coding Challenge",
-  "Logical Reasoning Test",
-];
+import examApi from "../../api/examApi";
+import userApi from "../../api/userApi";
+import assignmentApi from "../../api/assignmentApi";
+import { unwrapList } from "../../utils/apiResponse";
 
 export default function ExamAssignmentsPage() {
-  const [assignments, setAssignments] = useState(initialAssignments);
+  const [exams, setExams] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [examId, setExamId] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [dueAt, setDueAt] = useState("");
   const [search, setSearch] = useState("");
-  const [exam, setExam] = useState(examOptions[0]);
-  const [candidateName, setCandidateName] = useState("");
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const filteredAssignments = useMemo(
-    () =>
-      assignments.filter((assignment) =>
-        `${assignment.exam} ${assignment.candidate} ${assignment.email}`
-          .toLowerCase()
-          .includes(search.toLowerCase()),
-      ),
-    [assignments, search],
-  );
-
-  const assignCandidate = (event) => {
-    event.preventDefault();
-    setError("");
-    setNotice("");
-
-    if (!candidateName.trim() || !email.trim()) {
-      setError("Enter the candidate name and email address.");
-      return;
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const duplicate = assignments.some(
-      (item) =>
-        item.exam === exam &&
-        item.email.toLowerCase() === normalizedEmail,
-    );
-
-    if (duplicate) {
-      setError("This candidate is already assigned to the selected exam.");
-      return;
-    }
-
-    setAssignments((previous) => [
-      {
-        id: `ASN-${Date.now()}`,
-        exam,
-        candidate: candidateName.trim(),
-        email: normalizedEmail,
-        status: "Assigned",
-      },
-      ...previous,
+  const load = async () => {
+    const [examRes, studentRes, assignmentRes] = await Promise.all([
+      examApi.getExams(), userApi.getStudents(), assignmentApi.getAssignedByMe()
     ]);
-
-    setCandidateName("");
-    setEmail("");
-    setNotice("Assignment added to the local demo list. No invitation was sent.");
+    const es = unwrapList(examRes), ss = unwrapList(studentRes), aa = unwrapList(assignmentRes);
+    setExams(es); setStudents(ss); setAssignments(aa);
+    if (!examId && es.length) setExamId(String(es[0].id));
+    if (!studentId && ss.length) setStudentId(String(ss[0].id));
   };
 
-  const removeAssignment = (id) => {
-    if (!window.confirm("Remove this assignment from the demo list?")) return;
+  useEffect(() => { load().catch(e => setError(e.response?.data?.message || "Unable to load assignment data.")); }, []);
 
-    setAssignments((previous) => previous.filter((item) => item.id !== id));
-    setNotice("Assignment removed from the current demo list.");
+  const filtered = useMemo(() => assignments.filter(a => {
+    const student = a.user || {};
+    const exam = a.exam || {};
+    return `${a.examTitle || ""} ${a.studentFirstName || ""} ${a.studentLastName || ""} ${a.studentEmail || ""} ${a.studentId || ""}`.toLowerCase().includes(search.toLowerCase());
+  }), [assignments, search]);
+
+  const submit = async event => {
+    event.preventDefault(); setError(""); setNotice(""); setLoading(true);
+    try {
+      const response = await assignmentApi.assign({
+        examId: Number(examId),
+        userId: Number(studentId),
+        dueAt: dueAt ? new Date(dueAt).toISOString() : null
+      });
+      const result = response.data?.data || response.data;
+      setNotice(result.invitationEmailSent
+        ? "Exam assigned and invitation email sent to the student."
+        : `Exam assignment saved. Invitation email was not sent: ${result.invitationMessage || "Check SMTP settings."}`);
+      setDueAt("");
+      await load();
+    } catch (e) { setError(e.response?.data?.message || "Unable to assign exam."); }
+    finally { setLoading(false); }
   };
 
-  return (
-    <Box>
-      <PageHeader
-        title="Exam Assignments"
-        subtitle="Assign candidates to examinations and review their assignment status."
-      />
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {notice && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          {notice}
-        </Alert>
-      )}
-
-      <Card sx={{ borderRadius: 3, mb: 3 }}>
-        <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h6" fontWeight={700} mb={3}>
-            Assign a candidate
-          </Typography>
-
-          <Box component="form" onSubmit={assignCandidate}>
-            <Stack spacing={2}>
-              <TextField
-                select
-                fullWidth
-                label="Examination"
-                value={exam}
-                onChange={(event) => setExam(event.target.value)}
-              >
-                {examOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </TextField>
-
-              <TextField
-                fullWidth
-                label="Candidate name"
-                value={candidateName}
-                onChange={(event) => setCandidateName(event.target.value)}
-                required
-              />
-
-              <TextField
-                fullWidth
-                type="email"
-                label="Candidate email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-
-              <Button
-                type="submit"
-                variant="contained"
-                startIcon={<PersonAddAlt1Outlined />}
-              >
-                Assign Candidate
-              </Button>
-            </Stack>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Card sx={{ borderRadius: 3, mb: 3 }}>
-        <CardContent>
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Search assignments..."
-          />
-        </CardContent>
-      </Card>
-
-      <Stack spacing={2}>
-        {filteredAssignments.map((assignment) => (
-          <Card key={assignment.id} sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={2}
-                alignItems={{ xs: "flex-start", sm: "center" }}
-              >
-                <Box sx={{ flex: 1 }}>
-                  <Typography fontWeight={700}>
-                    {assignment.candidate}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {assignment.email}
-                  </Typography>
-                  <Typography variant="body2" mt={1}>
-                    {assignment.exam}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {assignment.id}
-                  </Typography>
-                </Box>
-
-                <Chip
-                  label={assignment.status}
-                  color={
-                    assignment.status === "Completed"
-                      ? "success"
-                      : assignment.status === "Invited"
-                        ? "info"
-                        : "primary"
-                  }
-                />
-
-                <Button
-                  color="error"
-                  startIcon={<Delete />}
-                  onClick={() => removeAssignment(assignment.id)}
-                >
-                  Remove
-                </Button>
-              </Stack>
-            </CardContent>
-          </Card>
-        ))}
-
-        {filteredAssignments.length === 0 && (
-          <EmptyState
-            title="No assignments found"
-            description="Try a different search term or assign a candidate."
-          />
-        )}
+  return <Box>
+    <PageHeader title="Exam Assignments" subtitle="Assign an exam to a registered student using their student ID. The signed-in employee is recorded as assigned by." />
+    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    {notice && <Alert severity="success" sx={{ mb: 2 }}>{notice}</Alert>}
+    <Card sx={{ borderRadius: 3, mb: 3 }}><CardContent>
+      <Typography variant="h6" fontWeight={700} mb={2}>Assign student</Typography>
+      <Box component="form" onSubmit={submit}><Stack spacing={2}>
+        <TextField select label="Exam" value={examId} onChange={e => setExamId(e.target.value)} required fullWidth>
+          {exams.map(ex => <MenuItem key={ex.id} value={String(ex.id)}>{ex.title} · #{ex.id}</MenuItem>)}
+        </TextField>
+        <TextField select label="Student" value={studentId} onChange={e => setStudentId(e.target.value)} required fullWidth>
+          {students.map(st => <MenuItem key={st.id} value={String(st.id)}>ID {st.id} — {st.firstName} {st.lastName} ({st.email})</MenuItem>)}
+        </TextField>
+        <TextField label="Due date (optional)" type="datetime-local" value={dueAt} onChange={e => setDueAt(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} fullWidth />
+        <Button type="submit" variant="contained" startIcon={<PersonAddAlt1Outlined />} disabled={loading || !examId || !studentId}>{loading ? "Assigning..." : "Assign exam"}</Button>
+      </Stack></Box>
+    </CardContent></Card>
+    <Card sx={{ borderRadius: 3, mb: 3 }}><CardContent><SearchBar value={search} onChange={setSearch} placeholder="Search student, email, ID or exam..." /></CardContent></Card>
+    <Stack spacing={2}>{filtered.map(a => <Card key={a.id}><CardContent>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography fontWeight={700}>{a.studentFirstName || ""} {a.studentLastName || ""} · Student ID {a.studentId}</Typography>
+          <Typography variant="body2" color="text.secondary">{a.studentEmail}</Typography>
+          <Typography variant="body2" mt={1}>{a.examTitle}</Typography>
+          <Typography variant="caption" color="text.secondary">Assignment #{a.id} · Assigned by {a.assignedByEmail || "current employee"}</Typography>
+        </Box>
+        <Chip label={a.status || "ASSIGNED"} color="success" />
       </Stack>
-    </Box>
-  );
+    </CardContent></Card>)}
+    {filtered.length === 0 && <EmptyState title="No assignments found" description="Assignments created by your account will appear here." />}
+    </Stack>
+  </Box>;
 }

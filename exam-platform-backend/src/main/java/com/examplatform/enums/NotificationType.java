@@ -1,5 +1,5 @@
 package com.examplatform.enums;
 
-public class NotificationType {
-
+public enum NotificationType {
+    INFO, SUCCESS, WARNING, ERROR, EXAM, RESULT, SYSTEM
 }

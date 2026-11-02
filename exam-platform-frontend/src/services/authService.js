@@ -30,7 +30,7 @@ const authService = {
   async logout() {
     try {
       if (localStorage.getItem(TOKEN_KEY)) {
-        await authApi.logout();
+        await authApi.logout(localStorage.getItem(REFRESH_TOKEN_KEY));
       }
     } finally {
       localStorage.removeItem(TOKEN_KEY);

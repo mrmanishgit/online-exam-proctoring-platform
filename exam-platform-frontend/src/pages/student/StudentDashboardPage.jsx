@@ -1,135 +1,26 @@
-import { Box, Button, Grid, Stack, Typography, Paper } from "@mui/material";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
-import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
-import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Alert, Box, Button, Card, CardContent, Grid, Paper, Stack, Typography } from "@mui/material";
+import { AssignmentRounded, ArrowForwardRounded, ScheduleRounded, EmojiEventsRounded } from "@mui/icons-material";
 import PageHeader from "../../components/common/PageHeader";
+import Loader from "../../components/common/Loader";
+import examApi from "../../api/examApi";
+import attemptApi from "../../api/attemptApi";
+import resultApi from "../../api/resultApi";
+import { unwrapList } from "../../utils/apiResponse";
 import useAuth from "../../hooks/useAuth";
 
-const stats = [
-  { label: "Available exams", value: "08", icon: AssignmentRoundedIcon, color: "#4F46E5", bg: "#EEF2FF" },
-  { label: "Completed attempts", value: "12", icon: TaskAltRoundedIcon, color: "#059669", bg: "#D1FAE5" },
-  { label: "Average score", value: "84%", icon: EmojiEventsRoundedIcon, color: "#D97706", bg: "#FEF3C7" },
-  { label: "Upcoming exams", value: "03", icon: ScheduleRoundedIcon, color: "#0284C7", bg: "#E0F2FE" },
-];
-
-const upcomingExams = [
-  { id: "EX-101", title: "Java Programming Assessment", category: "Programming", date: "Tomorrow, 10:00 AM", duration: "60 minutes" },
-  { id: "EX-102", title: "Database Fundamentals", category: "Technical", date: "Oct 31, 2026 · 2:00 PM", duration: "45 minutes" },
-  { id: "EX-103", title: "Logical Reasoning Test", category: "Aptitude", date: "Nov 02, 2026 · 11:00 AM", duration: "30 minutes" },
-];
-
 export default function StudentDashboardPage() {
-  const { user } = useAuth();
-
-  return (
-    <Stack spacing={4}>
-      <PageHeader
-        title={`Welcome back${user?.name ? `, ${user.name.split(" ")[0]}` : ""}!`}
-        subtitle="Here is your examination overview and what is coming up next."
-      />
-
-      <Grid container spacing={2.5}>
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-
-          return (
-            <Grid key={stat.label} size={{ xs: 12, sm: 6, xl: 3 }}>
-              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 4 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Box>
-                    <Typography color="text.secondary" variant="body2">
-                      {stat.label}
-                    </Typography>
-                    <Typography variant="h4" fontWeight={850} mt={1}>
-                      {stat.value}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ width: 48, height: 48, borderRadius: 3, bgcolor: stat.bg, color: stat.color, display: "grid", placeItems: "center" }}>
-                    <Icon />
-                  </Box>
-                </Stack>
-              </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
-
-      <Paper
-        sx={{
-          p: { xs: 3, md: 4 },
-          borderRadius: 4,
-          color: "white",
-          background: "linear-gradient(120deg, #3730A3, #4F46E5 55%, #0284C7)",
-          overflow: "hidden",
-        }}
-      >
-        <Grid container spacing={3} alignItems="center">
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Typography variant="overline" sx={{ opacity: 0.8 }}>
-              YOUR NEXT STEP
-            </Typography>
-            <Typography variant="h4" fontWeight={850} mt={1}>
-              Ready for your next challenge?
-            </Typography>
-            <Typography sx={{ opacity: 0.85, mt: 1, maxWidth: 600 }}>
-              Explore scheduled assessments, review instructions, and prepare your system before exam time.
-            </Typography>
-            <Button
-              component={Link}
-              to="/student/exams"
-              variant="contained"
-              endIcon={<ArrowForwardRoundedIcon />}
-              sx={{ mt: 3, bgcolor: "white", color: "#3730A3", "&:hover": { bgcolor: "#EEF2FF" } }}
-            >
-              Explore exams
-            </Button>
-          </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Box sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "center" } }}>
-              <AssignmentRoundedIcon sx={{ fontSize: { xs: 80, md: 130 }, opacity: 0.3 }} />
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      <Box>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-          <Box>
-            <Typography variant="h5" fontWeight={800}>Upcoming exams</Typography>
-            <Typography color="text.secondary" mt={0.5}>Plan ahead and prepare for your assessments.</Typography>
-          </Box>
-          <Button component={Link} to="/student/exams" endIcon={<ArrowForwardRoundedIcon />}>
-            View all
-          </Button>
-        </Stack>
-
-        <Stack spacing={2}>
-          {upcomingExams.map((exam) => (
-            <Paper key={exam.id} variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
-              <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }} spacing={2}>
-                <Box sx={{ width: 48, height: 48, borderRadius: 3, bgcolor: "#EEF2FF", color: "#4F46E5", display: "grid", placeItems: "center", flexShrink: 0 }}>
-                  <AssignmentRoundedIcon />
-                </Box>
-
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography fontWeight={750}>{exam.title}</Typography>
-                  <Typography variant="body2" color="text.secondary" mt={0.5}>
-                    {exam.category} · {exam.duration} · {exam.date}
-                  </Typography>
-                </Box>
-
-                <Button component={Link} to={`/student/exams/${exam.id}`} variant="outlined">
-                  View details
-                </Button>
-              </Stack>
-            </Paper>
-          ))}
-        </Stack>
-      </Box>
-    </Stack>
-  );
+  const { user } = useAuth(); const [exams,setExams]=useState([]); const [attempts,setAttempts]=useState([]); const [results,setResults]=useState([]); const [loading,setLoading]=useState(true); const [error,setError]=useState("");
+  useEffect(()=>{let active=true;Promise.all([examApi.getAvailableExams(),attemptApi.getMyAttempts(),resultApi.getMyResults()]).then(([e,a,r])=>{if(!active)return;setExams(unwrapList(e));setAttempts(unwrapList(a));setResults(unwrapList(r));}).catch(err=>{if(active)setError(err?.response?.data?.message||"Unable to load your dashboard from the backend.");}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[]);
+  const completed=attempts.filter(a=>["SUBMITTED","COMPLETED"].includes(String(a.status).toUpperCase())).length;
+  const average=results.length?Math.round(results.reduce((sum,r)=>sum+Number(r.percentage||0),0)/results.length):0;
+  const stats=[{label:"Available exams",value:exams.length,icon:AssignmentRounded},{label:"My attempts",value:attempts.length,icon:ScheduleRounded},{label:"Completed exams",value:completed,icon:EmojiEventsRounded},{label:"Average published score",value:`${average}%`,icon:EmojiEventsRounded}];
+  return <Stack spacing={3}><PageHeader title={`Welcome back${user?.firstName?`, ${user.firstName}`:""}!`} subtitle="Your examination overview is loaded from your account."/>
+    {error&&<Alert severity="error">{error}</Alert>}{loading?<Loader/>:<>
+      <Grid container spacing={2.5}>{stats.map(s=>{const Icon=s.icon;return <Grid key={s.label} size={{xs:12,sm:6,xl:3}}><Paper variant="outlined" sx={{p:2.5,borderRadius:4}}><Stack direction="row" justifyContent="space-between" alignItems="center"><Box><Typography color="text.secondary" variant="body2">{s.label}</Typography><Typography variant="h4" fontWeight={850} mt={1}>{s.value}</Typography></Box><Icon color="primary"/></Stack></Paper></Grid>;})}</Grid>
+      <Paper sx={{p:{xs:3,md:4},borderRadius:4,color:"white",background:"linear-gradient(120deg, #3730A3, #4F46E5 55%, #0284C7)"}}><Typography variant="overline">YOUR NEXT STEP</Typography><Typography variant="h4" fontWeight={850} mt={1}>Ready for your next challenge?</Typography><Typography sx={{opacity:.9,mt:1}}>Explore exams published by your administrator.</Typography><Button component={Link} to="/student/exams" variant="contained" endIcon={<ArrowForwardRounded/>} sx={{mt:3,bgcolor:"white",color:"#3730A3"}}>Explore exams</Button></Paper>
+      <Box><Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}><Box><Typography variant="h5" fontWeight={800}>Available exams</Typography><Typography color="text.secondary">Published exams currently available.</Typography></Box><Button component={Link} to="/student/exams">View all</Button></Stack>
+        {exams.length===0?<Alert severity="info">There are no published exams available for your account yet.</Alert>:<Stack spacing={2}>{exams.slice(0,5).map(exam=><Card key={exam.id} variant="outlined" sx={{borderRadius:3}}><CardContent><Stack direction="row" justifyContent="space-between" alignItems="center"><Box><Typography fontWeight={750}>{exam.title}</Typography><Typography variant="body2" color="text.secondary">{exam.subject||exam.examType} · {exam.durationMinutes} minutes</Typography></Box><Button component={Link} to={`/student/exams/${exam.id}`}>View exam</Button></Stack></CardContent></Card>)}</Stack>}</Box>
+    </>}</Stack>;
 }

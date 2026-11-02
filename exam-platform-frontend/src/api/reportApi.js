@@ -1,5 +1,6 @@
 import axiosClient from "./axiosClient";
 
+// These report endpoints require backend aggregate/report controllers.
 const reportApi = {
   getDashboardReport: (params) => axiosClient.get("/reports/dashboard", { params }),
   getExamReport: (examId, params) => axiosClient.get(`/reports/exams/${encodeURIComponent(examId)}`, { params }),

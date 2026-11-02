@@ -4,6 +4,7 @@ const questionApi = {
   getQuestions: (params) => axiosClient.get("/questions", { params }),
   getQuestionById: (id) => axiosClient.get(`/questions/${encodeURIComponent(id)}`),
   getQuestionsByExam: (examId, params) => axiosClient.get(`/exams/${encodeURIComponent(examId)}/questions`, { params }),
+  createQuestionForExam: (examId, payload) => axiosClient.post(`/exams/${encodeURIComponent(examId)}/questions`, payload),
   createQuestion: (payload) => axiosClient.post("/questions", payload),
   updateQuestion: (id, payload) => axiosClient.put(`/questions/${encodeURIComponent(id)}`, payload),
   deleteQuestion: (id) => axiosClient.delete(`/questions/${encodeURIComponent(id)}`),

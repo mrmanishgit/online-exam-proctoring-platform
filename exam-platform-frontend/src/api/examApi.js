@@ -6,9 +6,10 @@ const examApi = {
   createExam: (payload) => axiosClient.post("/exams", payload),
   updateExam: (id, payload) => axiosClient.put(`/exams/${encodeURIComponent(id)}`, payload),
   deleteExam: (id) => axiosClient.delete(`/exams/${encodeURIComponent(id)}`),
+  scheduleExam: (id, payload) => axiosClient.put(`/exams/${encodeURIComponent(id)}/schedule`, payload),
   publishExam: (id) => axiosClient.post(`/exams/${encodeURIComponent(id)}/publish`),
   cancelExam: (id) => axiosClient.post(`/exams/${encodeURIComponent(id)}/cancel`),
   getAvailableExams: (params) => axiosClient.get("/exams/available", { params }),
-  getAssignedExams: (params) => axiosClient.get("/exams/assigned", { params }),
+  getAssignedExams: (params) => axiosClient.get("/employee/exams", { params }),
 };
 export default examApi;

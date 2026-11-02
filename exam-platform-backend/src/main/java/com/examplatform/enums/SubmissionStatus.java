@@ -1,5 +1,5 @@
 package com.examplatform.enums;
 
-public class SubmissionStatus {
-
+public enum SubmissionStatus {
+    PENDING, QUEUED, RUNNING, ACCEPTED, WRONG_ANSWER, COMPILATION_ERROR, RUNTIME_ERROR, TIME_LIMIT_EXCEEDED, FAILED
 }

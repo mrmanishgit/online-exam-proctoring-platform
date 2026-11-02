@@ -1,0 +1,42 @@
+ExamPilot source update - 2026-11-01
+
+Input: src (2).zip (source tree only)
+
+Changes made:
+1. Removed src/main/java/com/examplatform/service/impl/ExamWorkflowService.java.
+   The workflow implementation in com.examplatform.workflow.service is retained and is
+   the implementation injected by com.examplatform.workflow.controller.ExamWorkflowController.
+2. Kept the existing generic ExamAssignmentController CRUD methods, but moved its legacy
+   entity-based POST from POST /api/exam-assignments to POST /api/exam-assignments/legacy.
+   POST /api/exam-assignments is now owned by EmployeeWorkflowController and uses
+   AssignExamRequest + EmployeeAssignmentWorkflow. The generic controller is ADMIN-only.
+3. Kept the existing NotificationController CRUD functionality, but moved its admin list
+   from GET /api/notifications to GET /api/notifications/admin/all and its admin delete
+   from DELETE /api/notifications/{id} to DELETE /api/notifications/admin/{id}.
+   User-scoped GET /api/notifications and DELETE /api/notifications/{id} remain owned by
+   NotificationWorkflowController. The generic controller is ADMIN-only.
+4. Removed an unused ExamWorkflowService import from CodingWorkflowController.
+5. Kept the two SaveAnswerRequest classes because they are in different packages and serve
+   different DTO contracts; they are not duplicate Java fully-qualified classes.
+
+Preserved:
+- All other source files and the existing test source from the supplied archive.
+- Existing generic controller CRUD methods, with conflicting methods moved to distinct paths.
+- Workflow controllers/services and entity/repository classes.
+
+Verification limits:
+- Static source audit found no duplicate simple names among Spring stereotype beans after
+  removing the legacy ExamWorkflowService.
+- The known ambiguous request mappings from the supplied log were separated.
+- This archive contains src/ only; it does not contain pom.xml, application properties,
+  database migration/schema, or frontend files. A Maven compile/test and runtime startup
+  could not be performed from this archive alone.
+- Other compile/runtime issues may still depend on the omitted pom.xml, application config,
+  database schema, and environment. Please retain a backup of your existing project.
+
+Changed endpoint paths:
+- POST /api/exam-assignments/legacy (legacy entity-based admin create)
+- POST /api/exam-assignments (workflow assignment DTO)
+- GET /api/notifications/admin/all (admin list)
+- DELETE /api/notifications/admin/{id} (admin delete)
+- GET /api/notifications and DELETE /api/notifications/{id} (user-scoped workflow)

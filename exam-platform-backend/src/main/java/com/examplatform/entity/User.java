@@ -1,54 +1,51 @@
-
 package com.examplatform.entity;
 
 import com.examplatform.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-@Entity
-@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "users", indexes = {
+    @Index(name = "idx_users_email", columnList = "email", unique = true)
+})
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false, length = 120)
-    private String fullName;
+    @Column(nullable = false, length = 100)
+    private String firstName;
 
-    @Column(nullable = false, unique = true, length = 190)
+    @Column(length = 100)
+    private String lastName;
+
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
 
     @Column(length = 20)
     private String phone;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(nullable = false, length = 255)
+    private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private Role role = Role.STUDENT;
-
-    @Column(name = "email_verified", nullable = false)
-    private boolean emailVerified = false;
+    @Column(nullable = false, length = 30)
+    private Role role;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private Boolean enabled = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    private Instant updatedAt;
 }

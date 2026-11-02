@@ -5,6 +5,6 @@ const invitationApi = {
   createInvitation: (payload) => axiosClient.post("/invitations", payload),
   resendInvitation: (id) => axiosClient.post(`/invitations/${encodeURIComponent(id)}/resend`),
   revokeInvitation: (id) => axiosClient.delete(`/invitations/${encodeURIComponent(id)}`),
-  acceptInvitation: (token, payload = {}) => axiosClient.post(`/invitations/${encodeURIComponent(token)}/accept`, payload),
+  acceptInvitation: (token) => axiosClient.post(`/invitations/${encodeURIComponent(token)}/accept`),
 };
 export default invitationApi;

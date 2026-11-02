@@ -5,7 +5,7 @@ const authApi = {
 
   register: (details) => axiosClient.post("/auth/register", details),
 
-  logout: () => axiosClient.post("/auth/logout"),
+  logout: (refreshToken) => axiosClient.post("/auth/logout", refreshToken ? { refreshToken } : {}),
 
   refreshToken: (refreshToken) =>
     axiosClient.post("/auth/refresh", { refreshToken }),

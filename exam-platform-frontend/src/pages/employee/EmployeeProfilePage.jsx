@@ -14,12 +14,14 @@ import {
 import { SaveOutlined } from "@mui/icons-material";
 import PageHeader from "../../components/common/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
+import userApi from "../../api/userApi";
 
 export default function EmployeeProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [form, setForm] = useState({
-    name: user?.name ?? "",
+    firstName: user?.firstName ?? user?.name?.split(" ")[0] ?? "",
+    lastName: user?.lastName ?? user?.name?.split(" ").slice(1).join(" ") ?? "",
     email: user?.email ?? "",
     phone: user?.phone ?? "",
     department: user?.department ?? "",
@@ -27,6 +29,8 @@ export default function EmployeeProfilePage() {
   });
 
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const updateField = (event) => {
     setForm((previous) => ({
@@ -36,10 +40,10 @@ export default function EmployeeProfilePage() {
     setSaved(false);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Connect to the employee profile update API.
-    setSaved(true);
+  const handleSubmit = async (event) => {
+    event.preventDefault(); setSaving(true); setError(""); setSaved(false);
+    try { const response = await userApi.updateCurrentUser({ firstName: form.firstName, lastName: form.lastName, phone: form.phone }); const updated = response?.data ?? response; updateUser(updated); setForm(old => ({...old, firstName: updated.firstName ?? old.firstName, lastName: updated.lastName ?? old.lastName, phone: updated.phone ?? old.phone})); setSaved(true); }
+    catch (err) { setError(err?.response?.data?.message || "Profile could not be saved."); } finally { setSaving(false); }
   };
 
   return (
@@ -49,10 +53,10 @@ export default function EmployeeProfilePage() {
         subtitle="Manage your employee account information."
       />
 
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
       {saved && (
         <Alert severity="info" sx={{ mb: 3 }}>
-          Profile changes are currently local to this page. Connect the profile
-          update API to save them permanently.
+          Your profile changes have been saved to your account.
         </Alert>
       )}
 
@@ -70,11 +74,11 @@ export default function EmployeeProfilePage() {
                   fontSize: 34,
                 }}
               >
-                {form.name?.charAt(0)?.toUpperCase() || "E"}
+                {form.firstName?.charAt(0)?.toUpperCase() || "E"}
               </Avatar>
 
               <Typography variant="h6" fontWeight={700}>
-                {form.name || "Employee"}
+                {[form.firstName, form.lastName].filter(Boolean).join(" ") || "Employee"}
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
@@ -101,11 +105,14 @@ export default function EmployeeProfilePage() {
                     <TextField
                       fullWidth
                       label="Full name"
-                      name="name"
-                      value={form.name}
+                      name="firstName"
+                      value={form.firstName}
                       onChange={updateField}
                       required
                     />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField fullWidth label="Last name" name="lastName" value={form.lastName} onChange={updateField} />
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
@@ -117,6 +124,7 @@ export default function EmployeeProfilePage() {
                       value={form.email}
                       onChange={updateField}
                       required
+                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
 
@@ -130,42 +138,23 @@ export default function EmployeeProfilePage() {
                     />
                   </Grid>
 
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="Department"
-                      name="department"
-                      value={form.department}
-                      onChange={updateField}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      fullWidth
-                      label="Employee ID"
-                      name="employeeId"
-                      value={form.employeeId}
-                      onChange={updateField}
-                      disabled
-                    />
-                  </Grid>
-
                   <Grid size={{ xs: 12 }}>
                     <Stack direction="row" spacing={2}>
                       <Button
                         type="submit"
+                        disabled={saving}
                         variant="contained"
                         startIcon={<SaveOutlined />}
                       >
-                        Save Changes
+                        {saving ? "Saving..." : "Save Changes"}
                       </Button>
 
                       <Button
                         variant="outlined"
                         onClick={() => {
                           setForm({
-                            name: user?.name ?? "",
+                            firstName: user?.firstName ?? user?.name?.split(" ")[0] ?? "",
+    lastName: user?.lastName ?? user?.name?.split(" ").slice(1).join(" ") ?? "",
                             email: user?.email ?? "",
                             phone: user?.phone ?? "",
                             department: user?.department ?? "",

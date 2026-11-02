@@ -1,5 +1,5 @@
 package com.examplatform.enums;
 
-public class ExamType {
-
+public enum ExamType {
+    APTITUDE, CODING, MCQ, SUBJECTIVE, MIXED
 }

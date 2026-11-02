@@ -1,5 +1,5 @@
 package com.examplatform.enums;
 
-public class ExamStatus {
-
+public enum ExamStatus {
+    DRAFT, SCHEDULED, PUBLISHED, ACTIVE, COMPLETED, CANCELLED, ARCHIVED
 }

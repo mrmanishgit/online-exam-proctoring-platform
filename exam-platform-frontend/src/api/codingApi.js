@@ -1,5 +1,6 @@
 import axiosClient from "./axiosClient";
 
+// Submission CRUD exists. Running untrusted code requires an isolated execution service.
 const codingApi = {
   runCode: (payload) => axiosClient.post("/coding/run", payload),
   execute: (payload) => axiosClient.post("/coding/run", payload),

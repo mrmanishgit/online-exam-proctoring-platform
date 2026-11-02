@@ -1,85 +1,65 @@
-
 package com.examplatform.security;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.examplatform.entity.User;
-import com.examplatform.repository.UserRepository;
-
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(
-            JwtService jwtService,
-            UserRepository userRepository) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain chain) throws ServletException, IOException {
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-
+        final String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
-            chain.doFilter(request, response);
+            filterChain.doFilter(request, response);
             return;
         }
 
+        final String token = header.substring(7);
         try {
-            String token = header.substring(7);
-            Claims claims = jwtService.extractClaims(token);
-            String email = claims.getSubject();
+            final String username = jwtService.extractUsername(token);
+            if (username != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (email != null
-                    && SecurityContextHolder.getContext()
-                            .getAuthentication() == null) {
-
-                User user = userRepository.findByEmailIgnoreCase(email)
-                        .filter(User::isActive)
-                        .orElse(null);
-
-                if (user != null
-                        && jwtService.isTokenValid(token, user.getEmail())) {
-
-                    var authentication =
+                if (jwtService.isTokenValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
-                                    user.getEmail(),
-                                    null,
-                                    List.of(new SimpleGrantedAuthority(
-                                            "ROLE_" + user.getRole().name()
-                                    ))
-                            );
-
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(authentication);
+                                    userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        } catch (io.jsonwebtoken.JwtException
-                 | IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
+            // Invalid/expired tokens are not authenticated. Protected endpoints will return 401.
             SecurityContextHolder.clearContext();
         }
 
-        chain.doFilter(request, response);
+        filterChain.doFilter(request, response);
     }
 }

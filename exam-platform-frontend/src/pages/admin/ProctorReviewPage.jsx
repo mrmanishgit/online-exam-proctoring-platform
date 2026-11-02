@@ -1,204 +1,77 @@
-import { useMemo, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
-import {
-  CheckCircleRounded,
-  FlagOutlined,
-  VisibilityOutlined,
-} from "@mui/icons-material";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Alert, Box, Button, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+import { CheckCircleRounded, FlagOutlined } from "@mui/icons-material";
 import PageHeader from "../../components/common/PageHeader";
 import SearchBar from "../../components/common/SearchBar";
 import EmptyState from "../../components/common/EmptyState";
-
-const initialEvents = [
-  {
-    id: "EVT-1001",
-    candidate: "Candidate Two",
-    exam: "Python Coding Challenge",
-    type: "Multiple tab switches",
-    time: "10:24 AM",
-    severity: "High",
-    status: "Pending Review",
-  },
-  {
-    id: "EVT-1002",
-    candidate: "Candidate Four",
-    exam: "Java Fundamentals Assessment",
-    type: "Face not detected",
-    time: "10:31 AM",
-    severity: "Medium",
-    status: "Pending Review",
-  },
-  {
-    id: "EVT-1003",
-    candidate: "Candidate Five",
-    exam: "Logical Reasoning Test",
-    type: "Camera connection interrupted",
-    time: "10:42 AM",
-    severity: "Low",
-    status: "Reviewed",
-  },
-];
+import Loader from "../../components/common/Loader";
+import proctoringApi from "../../api/proctoringApi";
+import { unwrapList } from "../../utils/apiResponse";
 
 export default function ProctorReviewPage() {
-  const [events, setEvents] = useState(initialEvents);
+  const [params] = useSearchParams();
+  const attemptId = params.get("attemptId");
+  const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState(null);
 
-  const filteredEvents = useMemo(
-    () =>
-      events.filter((event) => {
-        const matchesSearch = `${event.id} ${event.candidate} ${event.exam} ${event.type}`
-          .toLowerCase()
-          .includes(search.toLowerCase());
+  async function load() {
+    try {
+      const response = attemptId
+        ? await proctoringApi.getEventsByAttempt(attemptId)
+        : await proctoringApi.getEvents();
+      setEvents(unwrapList(response));
+      setError("");
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to load proctoring events.");
+    } finally { setLoading(false); }
+  }
 
-        return matchesSearch && (filter === "All" || event.status === filter);
-      }),
-    [events, search, filter],
-  );
+  useEffect(() => { load(); }, [attemptId]);
 
-  const markReviewed = (id) => {
-    setEvents((previous) =>
-      previous.map((event) =>
-        event.id === id ? { ...event, status: "Reviewed" } : event,
-      ),
-    );
-  };
+  async function markReviewed(id) {
+    setBusyId(id);
+    try {
+      await proctoringApi.reviewEvent(id);
+      await load();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to mark event as reviewed.");
+    } finally { setBusyId(null); }
+  }
 
-  return (
-    <Box>
-      <PageHeader
-        title="Proctoring Event Review"
-        subtitle="Review monitoring alerts and record assessment decisions."
-      />
+  const filtered = useMemo(() => events.filter((event) => {
+    const text = `${event.id} ${event.studentName || ""} ${event.studentEmail || ""} ${event.examTitle || ""} ${event.eventType || ""} ${event.description || ""}`.toLowerCase();
+    const reviewed = Boolean(event.reviewed);
+    return text.includes(search.toLowerCase())
+      && (filter === "All" || (filter === "Reviewed" ? reviewed : !reviewed));
+  }), [events, search, filter]);
 
-      <Alert severity="warning" sx={{ mb: 3 }}>
-        A monitoring alert is not proof of misconduct. Review available evidence
-        and follow your institution's review and appeal procedures before
-        taking action against a candidate.
-      </Alert>
-
-      <Card sx={{ borderRadius: 3, mb: 3 }}>
-        <CardContent>
-          <Stack spacing={2}>
-            <SearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Search event, candidate, or exam..."
-            />
-
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              {["All", "Pending Review", "Reviewed"].map((status) => (
-                <Chip
-                  key={status}
-                  label={status}
-                  clickable
-                  color={filter === status ? "primary" : "default"}
-                  variant={filter === status ? "filled" : "outlined"}
-                  onClick={() => setFilter(status)}
-                />
-              ))}
-            </Stack>
-          </Stack>
-        </CardContent>
-      </Card>
-
-      <Stack spacing={2}>
-        {filteredEvents.map((event) => (
-          <Card key={event.id} sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={2}
-                alignItems={{ xs: "flex-start", md: "center" }}
-              >
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 2,
-                    bgcolor: "action.hover",
-                    display: "grid",
-                    placeItems: "center",
-                  }}
-                >
-                  <FlagOutlined
-                    color={event.severity === "High" ? "error" : "warning"}
-                  />
-                </Box>
-
-                <Box sx={{ flex: 1 }}>
-                  <Typography fontWeight={700}>{event.type}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {event.candidate} · {event.exam}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {event.id} · {event.time}
-                  </Typography>
-                </Box>
-
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                  <Chip
-                    size="small"
-                    label={event.severity}
-                    color={
-                      event.severity === "High"
-                        ? "error"
-                        : event.severity === "Medium"
-                          ? "warning"
-                          : "default"
-                    }
-                  />
-                  <Chip
-                    size="small"
-                    label={event.status}
-                    color={event.status === "Reviewed" ? "success" : "info"}
-                  />
-                </Stack>
-
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<VisibilityOutlined />}
-                    onClick={() =>
-                      window.alert(
-                        "Connect this action to the proctoring evidence API.",
-                      )
-                    }
-                  >
-                    Evidence
-                  </Button>
-
-                  {event.status !== "Reviewed" && (
-                    <Button
-                      variant="contained"
-                      startIcon={<CheckCircleRounded />}
-                      onClick={() => markReviewed(event.id)}
-                    >
-                      Mark Reviewed
-                    </Button>
-                  )}
-                </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
-        ))}
-
-        {filteredEvents.length === 0 && (
-          <EmptyState
-            title="No proctoring events found"
-            description="Try a different search term or review status."
-          />
-        )}
-      </Stack>
-    </Box>
-  );
+  return <Box>
+    <PageHeader title="Proctoring Event Review" subtitle={attemptId ? `Reviewing events for attempt #${attemptId}` : "Review recorded proctoring events from student exam attempts."}
+      action={<Button variant="outlined" onClick={() => load()}>Refresh</Button>} />
+    <Alert severity="warning" sx={{ mb: 3 }}>A monitoring alert is not proof of misconduct. Review available evidence and follow your institution's review and appeal procedures before taking action.</Alert>
+    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <Card sx={{ mb: 3 }}><CardContent><Stack spacing={2}>
+      <SearchBar value={search} onChange={setSearch} placeholder="Search event, candidate, or exam..." />
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>{["All", "Pending Review", "Reviewed"].map((v) => <Chip key={v} label={v} clickable color={filter === v ? "primary" : "default"} variant={filter === v ? "filled" : "outlined"} onClick={() => setFilter(v)} />)}</Stack>
+    </Stack></CardContent></Card>
+    {loading ? <Loader /> : <Stack spacing={2}>
+      {filtered.map((event) => <Card key={event.id}><CardContent><Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ xs: "flex-start", md: "center" }}>
+        <Box sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: "action.hover", display: "grid", placeItems: "center" }}><FlagOutlined color={String(event.severity).toUpperCase() === "HIGH" ? "error" : "warning"} /></Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography fontWeight={700}>{event.eventType || "Proctoring event"}</Typography>
+          <Typography variant="body2" color="text.secondary">{event.studentName || event.studentEmail || "Student"} · {event.examTitle || "Exam"}</Typography>
+          <Typography variant="body2">{event.description || "No additional details"}</Typography>
+          <Typography variant="caption" color="text.secondary">Event #{event.id} · Attempt #{event.attemptId} · {event.occurredAt ? new Date(event.occurredAt).toLocaleString() : "Time unavailable"}</Typography>
+        </Box>
+        <Stack direction="row" spacing={1}><Chip size="small" label={event.severity || "MEDIUM"} color={String(event.severity).toUpperCase() === "HIGH" ? "error" : String(event.severity).toUpperCase() === "MEDIUM" ? "warning" : "default"} /><Chip size="small" label={event.reviewed ? "Reviewed" : "Pending Review"} color={event.reviewed ? "success" : "info"} /></Stack>
+        {!event.reviewed && <Button variant="contained" disabled={busyId === event.id} startIcon={<CheckCircleRounded />} onClick={() => markReviewed(event.id)}>Mark Reviewed</Button>}
+      </Stack></CardContent></Card>)}
+      {!filtered.length && <EmptyState title="No proctoring events" description="Events submitted by active student attempts will appear here." />}
+    </Stack>}
+  </Box>;
 }

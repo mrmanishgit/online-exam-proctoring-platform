@@ -2,11 +2,9 @@ import axiosClient from "./axiosClient";
 
 const proctoringApi = {
   recordEvent: (payload) => axiosClient.post("/proctoring/events", payload),
-  createEvent: (payload) => axiosClient.post("/proctoring/events", payload),
-  getEvents: (params) => axiosClient.get("/proctoring/events", { params }),
-  listEvents: (params) => axiosClient.get("/proctoring/events", { params }),
-  getEventsByAttempt: (attemptId, params) => axiosClient.get(`/proctoring/attempts/${encodeURIComponent(attemptId)}/events`, { params }),
-  reviewEvent: (id, payload) => axiosClient.patch(`/proctoring/events/${encodeURIComponent(id)}/review`, payload),
-  getLiveSessions: (params) => axiosClient.get("/proctoring/live-sessions", { params }),
+  getEvents: () => axiosClient.get("/proctoring/events"),
+  getEventsByAttempt: (attemptId) => axiosClient.get(`/proctoring/attempts/${encodeURIComponent(attemptId)}/events`),
+  reviewEvent: (id) => axiosClient.patch(`/proctoring/events/${encodeURIComponent(id)}/review`),
+  getLiveSessions: () => axiosClient.get("/proctoring/admin/monitoring/sessions"),
 };
 export default proctoringApi;

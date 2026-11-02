@@ -16,9 +16,10 @@ import {
 import { SaveOutlined, AccountCircle } from "@mui/icons-material";
 import PageHeader from "../../components/common/PageHeader";
 import { useAuth } from "../../hooks/useAuth";
+import userApi from "../../api/userApi";
 
 export default function StudentProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [form, setForm] = useState({
     firstName: user?.firstName ?? user?.name?.split(" ")[0] ?? "",
@@ -30,6 +31,8 @@ export default function StudentProfilePage() {
   });
 
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const updateField = (event) => {
     setForm((previous) => ({
@@ -39,11 +42,16 @@ export default function StudentProfilePage() {
     setSaved(false);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    // Connect this handler to the profile update API.
-    setSaved(true);
+  const handleSubmit = async (event) => {
+    event.preventDefault(); setSaving(true); setError(""); setSaved(false);
+    try {
+      const response = await userApi.updateCurrentUser({ firstName: form.firstName, lastName: form.lastName, phone: form.phone });
+      const updated = response?.data ?? response;
+      updateUser(updated);
+      setForm((old) => ({ ...old, firstName: updated.firstName ?? old.firstName, lastName: updated.lastName ?? old.lastName, phone: updated.phone ?? old.phone }));
+      setSaved(true);
+    } catch (err) { setError(err?.response?.data?.message || "Profile could not be saved. Please try again."); }
+    finally { setSaving(false); }
   };
 
   return (
@@ -53,10 +61,10 @@ export default function StudentProfilePage() {
         subtitle="View and manage your student account details."
       />
 
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
       {saved && (
         <Alert severity="info" sx={{ mb: 3 }}>
-          Changes are currently held in this page only. Connect the profile
-          update API to save them permanently.
+          Your profile changes have been saved to your account.
         </Alert>
       )}
 
@@ -139,6 +147,7 @@ export default function StudentProfilePage() {
                       value={form.email}
                       onChange={updateField}
                       required
+                      InputProps={{ readOnly: true }}
                     />
                   </Grid>
 
@@ -152,26 +161,6 @@ export default function StudentProfilePage() {
                     />
                   </Grid>
 
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
-                      fullWidth
-                      label="College / Institution"
-                      name="college"
-                      value={form.college}
-                      onChange={updateField}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      fullWidth
-                      label="Department"
-                      name="department"
-                      value={form.department}
-                      onChange={updateField}
-                    />
-                  </Grid>
-
                   <Grid size={{ xs: 12 }}>
                     <Stack
                       direction={{ xs: "column", sm: "row" }}
@@ -179,10 +168,11 @@ export default function StudentProfilePage() {
                     >
                       <Button
                         type="submit"
+                        disabled={saving}
                         variant="contained"
                         startIcon={<SaveOutlined />}
                       >
-                        Save Changes
+                        {saving ? "Saving..." : "Save Changes"}
                       </Button>
 
                       <Button
